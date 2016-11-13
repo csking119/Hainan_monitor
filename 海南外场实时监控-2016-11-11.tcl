@@ -8,6 +8,10 @@ set Device_list2      { Device2 Device6 Device7 Device8 }     ;#温度查询方式要加
 set Device_list3      { Device3 }  ;#查询注册需要匹配子卡.
 set Device_list4      { Device9 }     ;#温度查询通用
 set Device_list5      { Device2 Device6 Device7 Device8 Device9 } ;  #查询子卡pic状态
+set Device_list6      { Device8 Device9 } ;  #无告警设备
+set Device_list7      { Device2 } ; #告警设备
+set Device_list8      { Device6 } ; #告警设备
+set Device_list9      { Device7 } ; #告警设备
 set Device_Type_list { Device1_Type }
 
 set message TT    ;#短信模块串口名TT，窗口必须打开，使用时调用$message
@@ -151,65 +155,24 @@ return
 }
 
 #******************************************************查询复位状态ATN*************************************************************#
-foreach device $Device_list2 {
-tsend3  $device   -t 1000 "disp clock"
-tsend3  $device   -t 1000 "sy"
-tsend3  $device   -t 1000 "dia"
-#匹配设备单板类型，根据不同类型查询复位原因     
-tsend3 $device -r res_dev_rst1 -s "\<HUAWEI\>\ \[HUAWEI\ \[Y/N\]" -t 3000 "display board-reset 2"  
-#tsend3 $device -r res_dev_rst2 -s "\<HUAWEI\>\ \[HUAWEI\ \[Y/N\]" -t 3000 "display board-reset 17"
-after 5000
-tsend3  $device   -t 1000 "return"
-if {([string length $res_dev_rst1]>400)} {
-tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
-#tsend3  $Mail -t 10000  "mail send test command!"
-#puts "$Device1_Type"
 
 
-after 10000
-set Global 0
-return
-}
-}
 
 #******************************************************查询复位状态CX*************************************************************#
-foreach device $Device_list3 {
-tsend3  $device   -t 1000 "disp clock"
-tsend3  $device   -t 1000 "sy"
-tsend3  $device   -t 1000 "dia"
-#匹配设备单板类型，根据不同类型查询复位原因     
-tsend3 $device -r res_dev_rst1 -s "\<HUAWEI\>\ \[HUAWEI\ \[Y/N\]" -t 3000 "disp board-r 17 card 13"  
-#tsend3 $device -r res_dev_rst2 -s "\<HUAWEI\>\ \[HUAWEI\ \[Y/N\]" -t 3000 "display board-reset 17"
-after 3000
-tsend3  $device   -t 1000 "return"
-if {([string length $res_dev_rst1]>400)} {
-#tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
-#tsend3  $Mail -t 10000  "mail send test command!"
-#puts "$Device1_Type"
 
-tsend3 $message   -t 1000  AT+CMGS="$Phone"\r    ;#接收方电话号码
-tsend3 $message   -t 1000  "reset state of $device is Abnormal!!! -- CX600_M16A\r"
-tsend3 $message   -t 1000  \x1a   ;#启动发送标志
-after 10000
-set Global 0
-return
-}
-}
 #******************************************************查询告警状态*************************************************************#
-foreach device $Device_list2 {
-tsend3  $device   -t 1000 "disp clock"
+foreach device $Device_list6 {
+tsend3  $device -r time  -t 1000 "disp clock"
 #匹配设备单板类型，根据不同类型查询复位原因     
 tsend3 $device -r res_dev_alarm -s "\<HUAWEI\>\ \[HUAWEI\ \[Y/N\]" -t 3000 "display alarm all"  
 after 3000
 set num_dev_alarm [regexp {NO alarm} $res_dev_alarm] 
 if {$num_dev_alarm==0} {                ;#告警字符数在默认的告警回显字符数上不增加则代表没有新增告警
-#tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
+tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
 #tsend3  $Mail -t 10000  "mail send test command!"
 #puts "$Device1_Type"
 
-tsend3 $message   -t 1000  AT+CMGS="$Phone"\r    ;#接收方电话号码
-tsend3 $message   -t 1000  "Hardware Alarm -- ATN!!!\r"
-tsend3 $message   -t 1000  \x1a   ;#启动发送标志
+puts "alarm time is $time"
 after 10000
 
 set Global 0
@@ -218,33 +181,69 @@ return
 }
 tsend3 $device   -t 1000 "disp clock"
 #结束标志
-#tsend3 $device   -t 1000 "end"     
-#******************************************************查询告警状态CX*************************************************************#
-foreach device $Device_list3 {
-tsend3  $device   -t 1000 "disp clock"
+#tsend3 $device   -t 1000 "end" 
+foreach device $Device_list7 {
+tsend3  $device -r time  -t 1000 "disp clock"
 #匹配设备单板类型，根据不同类型查询复位原因     
 tsend3 $device -r res_dev_alarm -s "\<HUAWEI\>\ \[HUAWEI\ \[Y/N\]" -t 3000 "display alarm all"  
 after 3000
-set num_dev_alarm [regexp {No alarm} $res_dev_alarm] 
-if {$num_dev_alarm==0} {                ;#告警字符数在默认的告警回显字符数上不增加则代表没有新增告警
-#tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
+ #告警字符数在默认的告警回显字符数上不增加则代表没有新增告警
+if {([string length $res_dev_alarm]>500)} {                
+tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
 #tsend3  $Mail -t 10000  "mail send test command!"
 #puts "$Device1_Type"
 
-tsend3 $message   -t 1000  AT+CMGS="$Phone"\r    ;#接收方电话号码
-tsend3 $message   -t 1000  "Hardware Alarm -- CX600_M16A!!!\r"
-tsend3 $message   -t 1000  \x1a   ;#启动发送标志
+puts "alarm time is $time"
 after 10000
 
 set Global 0
 return
 }
+} 
+
+foreach device $Device_list8 {
+tsend3  $device -r time  -t 1000 "disp clock"
+#匹配设备单板类型，根据不同类型查询复位原因     
+tsend3 $device -r res_dev_alarm -s "\<HUAWEI\>\ \[HUAWEI\ \[Y/N\]" -t 3000 "display alarm all"  
+after 3000
+ #告警字符数在默认的告警回显字符数上不增加则代表没有新增告警
+if {([string length $res_dev_alarm]>580)} {                
+tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
+#tsend3  $Mail -t 10000  "mail send test command!"
+#puts "$Device1_Type"
+
+puts "alarm time is $time"
+after 10000
+
+set Global 0
+return
 }
-tsend3 $device   -t 1000 "disp clock"
+}  
+
+foreach device $Device_list9 {
+tsend3  $device -r time  -t 1000 "disp clock"
+#匹配设备单板类型，根据不同类型查询复位原因     
+tsend3 $device -r res_dev_alarm -s "\<HUAWEI\>\ \[HUAWEI\ \[Y/N\]" -t 3000 "display alarm all"  
+after 3000
+ #告警字符数在默认的告警回显字符数上不增加则代表没有新增告警
+if {([string length $res_dev_alarm]>1050)} {                
+tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
+#tsend3  $Mail -t 10000  "mail send test command!"
+#puts "$Device1_Type"
+
+puts "alarm time is $time"
+after 10000
+
+set Global 0
+return
+}
+} 
+#******************************************************查询告警状态CX*************************************************************#
+
 
 #*****************************************************计数加一******************************************************************#
 set Tick [expr $Tick+1]
-if {$Tick>500} {                                   ;#约是48小时，发送一封邮件告知测试人员设备无异常
+if {$Tick>800} {                                   ;#约是48小时，发送一封邮件告知测试人员设备无异常
 tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail\r"
 after 10000
 set Tick 0
