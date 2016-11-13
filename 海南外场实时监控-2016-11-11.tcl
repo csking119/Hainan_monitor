@@ -15,7 +15,8 @@ set Device_list9      { Device7 } ; #告警设备
 set Device_Type_list { Device1_Type }
 
 set message TT    ;#短信模块串口名TT，窗口必须打开，使用时调用$message
-set Mail    CMD   ;#发送邮件窗口 
+set Mail    CMD   ;#发送abnormal邮件窗口 
+set Mail2    CMDOK   ;#发送OK邮件窗口 
 #设备1，使用时调用$device1，打开窗口统一命名为设备的Device1、Device2...     
 
 #匹配设备形态：0-ATN  3-M2  5-M4  9-M8 17-M16 
@@ -244,7 +245,7 @@ return
 #*****************************************************计数加一******************************************************************#
 set Tick [expr $Tick+1]
 if {$Tick>800} {                                   ;#约是48小时，发送一封邮件告知测试人员设备无异常
-tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail\r"
+tsend3 $Mail2     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail\r"
 after 10000
 set Tick 0
 }
