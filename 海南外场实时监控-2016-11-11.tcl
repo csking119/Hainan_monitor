@@ -13,6 +13,8 @@ set Device_list10      { Device9 } ;  #无告警设备No alarm
 set Device_list7      { Device2 } ; #告警设备
 set Device_list8      { Device6 } ; #告警设备
 set Device_list9      { Device7 } ; #告警设备
+set Device_list11      { Device1 Device2 Device6 Device7 Device8 Device9 } ; 
+
 set Device_Type_list { Device1_Type }
 
 set message TT    ;#短信模块串口名TT，窗口必须打开，使用时调用$message
@@ -47,7 +49,7 @@ set num_dev_fan2 [regexp {(The fan is absent)} $res_dev_fan]
 if {($num_dev_fan1==1)|($num_dev_fan2==1)} { 
 #puts "$Device1_Type"
 tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
-
+tsend3  $Mail -t 10000  "\n"
 after 10000
 puts "FAN Abnormal time is $time"
 after 10000
@@ -71,7 +73,7 @@ set num_dev_device [regexp {(Abnormal)|(Unregistered)} $res_dev_device]
 #set num_dev_pic    [regexp {(Abnormal)|(Unregistered)} $res_dev_pic]   
 if {$num_dev_device==1} {
 tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
-
+tsend3  $Mail -t 10000  "\n"
 after 10000
 puts "device Abnormal time is $time"
 
@@ -96,7 +98,7 @@ set num_dev_device [regexp {(Abnormal)|(Unregistered)} $res_dev_device]
 #set num_dev_pic    [regexp {(Abnormal)|(Unregistered)} $res_dev_pic]   
 if {$num_dev_device==1} {
 tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
-#tsend3 $Mail  -t 10000  "mail send test command!"
+tsend3 $Mail  -t 10000  "\n"
 after 10000
 
 puts "device pic Abnormal time is $time"
@@ -118,7 +120,7 @@ after 3000
 set num_dev_temperature [regexp {(FATAL)|(MAJOR)|(MINOR)} $res_dev_temperature] 
 if {$num_dev_temperature==1} {
 tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
-#tsend3 $Mail  -t 10000  "mail send test command!"
+tsend3  $Mail -t 10000  "\n"
 after 10000
 puts "slot 2 temperature Abnormal time is $time"
 
@@ -139,7 +141,7 @@ after 3000
 set num_dev_temperature [regexp {(FATAL)|(MAJOR)|(MINOR)} $res_dev_temperature] 
 if {$num_dev_temperature==1} {
 tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
-#tsend3 $Mail  -t 10000  "mail send test command!"
+tsend3  $Mail -t 10000  "\n"
 after 10000
 puts "temperature Abnormal time is $time"
 
@@ -151,7 +153,27 @@ return
 }
 
 #******************************************************查询复位状态ATN*************************************************************#
+foreach device $Device_list11 {
+tsend3  $device  -r time -t 1000 "disp clock"
+tsend3  $device   -t 1000 "sy"
+tsend3  $device   -t 1000 "dia"
+#匹配设备单板类型，根据不同类型查询复位原因     
+tsend3 $device -r res_dev_rst1 -s "\<HUAWEI\>\ \[HUAWEI\ \[Y/N\]" -t 3000 "display board-reset 2"  
+#tsend3 $device -r res_dev_rst2 -s "\<HUAWEI\>\ \[HUAWEI\ \[Y/N\]" -t 3000 "display board-reset 17"
+after 5000
+tsend3  $device   -t 1000 "return"
+if {([string length $res_dev_rst1]>50)} {
+tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
+tsend3  $Mail -t 10000  "\n"
+#puts "$Device1_Type"
+puts "Device reset error time is $time"
 
+
+after 10000
+set Global 0
+return
+}
+}
 
 
 #******************************************************查询复位状态CX*************************************************************#
@@ -165,7 +187,7 @@ after 3000
 set num_dev_alarm [regexp {NO alarm} $res_dev_alarm] 
 if {$num_dev_alarm==0} {                ;#告警字符数在默认的告警回显字符数上不增加则代表没有新增告警
 tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
-#tsend3  $Mail -t 10000  "mail send test command!"
+tsend3  $Mail -t 10000  "\n"
 #puts "$Device1_Type"
 
 puts "Device8 alarm time is $time"
@@ -186,7 +208,7 @@ after 3000
 set num_dev_alarm [regexp {No alarm} $res_dev_alarm] 
 if {$num_dev_alarm==0} {                ;#告警字符数在默认的告警回显字符数上不增加则代表没有新增告警
 tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
-#tsend3  $Mail -t 10000  "mail send test command!"
+tsend3  $Mail -t 10000  "\n"
 #puts "$Device1_Type"
 
 puts "Device9 alarm time is $time"
@@ -205,7 +227,7 @@ after 3000
  #告警字符数在默认的告警回显字符数上不增加则代表没有新增告警
 if {([string length $res_dev_alarm]>500)} {                
 tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
-#tsend3  $Mail -t 10000  "mail send test command!"
+tsend3  $Mail -t 10000  "\n"
 #puts "$Device1_Type"
 
 puts "Device2 alarm time is $time"
@@ -225,7 +247,7 @@ after 3000
 if {([string length $res_dev_alarm]>650)} {    
 
 tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
-#tsend3  $Mail -t 10000  "mail send test command!"
+tsend3  $Mail -t 10000  "\n"
 #puts "$Device1_Type"
 
 puts "Device6 alarm time is $time"
@@ -245,7 +267,7 @@ after 3000
 if {([string length $res_dev_alarm]>1150)} {  
 
 tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
-#tsend3  $Mail -t 10000  "mail send test command!"
+tsend3  $Mail -t 10000  "\n"
 #puts "$Device1_Type"
 
 puts "Device7 alarm time is $time"
@@ -262,6 +284,7 @@ return
 set Tick [expr $Tick+1]
 if {$Tick>800} {                                   ;#约是48小时，发送一封邮件告知测试人员设备无异常
 tsend3 $Mail2     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail\r"
+tsend3  $Mail2 -t 10000  "\n"
 after 10000
 set Tick 0
 }
