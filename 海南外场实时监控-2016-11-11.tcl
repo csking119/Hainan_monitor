@@ -162,7 +162,7 @@ tsend3 $device -r res_dev_rst1 -s "\<HUAWEI\>\ \[HUAWEI\ \[Y/N\]" -t 3000 "displ
 #tsend3 $device -r res_dev_rst2 -s "\<HUAWEI\>\ \[HUAWEI\ \[Y/N\]" -t 3000 "display board-reset 17"
 after 5000
 tsend3  $device   -t 1000 "return"
-if {([string length $res_dev_rst1]>50)} {
+if {([string length $res_dev_rst1]>100)} {
 tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
 tsend3  $Mail -t 10000  "\n"
 #puts "$Device1_Type"
