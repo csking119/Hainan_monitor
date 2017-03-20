@@ -14,6 +14,8 @@ set Device_list7      { Device2 } ; #告警设备
 set Device_list8      { Device6 } ; #告警设备
 set Device_list9      { Device7 } ; #告警设备
 set Device_list11      { Device1 Device2 Device6 Device7 Device8 } ; 
+set Device_list12      { Device5 Device6 Device7 Device9 Device11 } ; #电压查询通用
+set Device_list13      { Device1 Device2 Device8 } ; #电压查询slot 2
 
 set Device_Type_list { Device1_Type }
 
@@ -144,6 +146,49 @@ tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.
 tsend3  $Mail -t 10000  "\n"
 after 10000
 puts "temperature Abnormal time is $time"
+
+after 10000
+
+set Global 0
+return
+}
+}
+
+#******************************************************查询电压状态通用*************************************************************#
+foreach device $Device_list12 {
+tsend3  $device  -r time -t 1000 "disp clock"
+#查询设备电压状态 res_dev_voltage存放设备温度状态字符串       
+tsend3 $device -r res_dev_voltage -s "\<HUAWEI\>\ \[HUAWEI\ \[Y/N\]" -t 3000 "display voltage"  
+after 3000
+#将匹配结果存放进num_dev_voltage，1-有异常  0-无异常    
+set num_dev_voltage [regexp {(FATAL)|(MAJOR)|(MINOR)} $res_dev_voltage] 
+if {$num_dev_voltage==1} {
+tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
+tsend3  $Mail -t 10000  "\n"
+after 10000
+puts "Voltage Abnormal time is $time"
+
+after 10000
+
+set Global 0
+return
+}
+}
+
+
+#******************************************************查询电压状态slot2*************************************************************#
+foreach device $Device_list13 {
+tsend3  $device  -r time -t 1000 "disp clock"
+#查询设备电压状态 res_dev_voltage存放设备温度状态字符串       
+tsend3 $device -r res_dev_voltage -s "\<HUAWEI\>\ \[HUAWEI\ \[Y/N\]" -t 3000 "display voltage slot 2"  
+after 3000
+#将匹配结果存放进num_dev_voltage，1-有异常  0-无异常    
+set num_dev_voltage [regexp {(FATAL)|(MAJOR)|(MINOR)} $res_dev_voltage] 
+if {$num_dev_voltage==1} {
+tsend3 $Mail     -t 10000  "java -classpath commons-logging-1.1.1.jar;log4j-1.2.17.jar;mail.jar;MailSend.jar org.jn.util.mail.Mail"
+tsend3  $Mail -t 10000  "\n"
+after 10000
+puts "Voltage Abnormal time is $time"
 
 after 10000
 
